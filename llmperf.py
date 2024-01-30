@@ -17,6 +17,7 @@ FRAMEWORKS = [
     "perplexity",
     "together",
     "vllm",
+    "mlc",
 ]
 
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -107,6 +108,7 @@ def validate(ep_config, sample_lines):
         "fireworks",
         "perplexity",
         "vllm",
+        "mlc",
     ]:
         messages = [
             {"role": "system", "content": sys_prompt},
@@ -130,7 +132,7 @@ def validate(ep_config, sample_lines):
                 if tok.choices[0].delta:
                     delta = tok.choices[0].delta
                     if "content" in delta:
-                        if ttft == 0:
+                        if ttft == 0 and not ("role" in delta and delta["role"] == "assistant"):
                             ttft = time.time() - st
                         words += delta["content"]
             et = time.time()
@@ -447,6 +449,9 @@ if __name__ == "__main__":
     elif args.framework == "vllm":
         endpoint_config["api_base"] = os.environ["VLLM_API_BASE"]
         endpoint_config["api_key"] = os.environ["VLLM_API_KEY"]
+    elif args.framework == "mlc":
+        endpoint_config["api_base"] = os.environ["MLC_API_BASE"]
+        endpoint_config["api_key"] = os.environ["MLC_API_KEY"]
 
     endpoint_config["framework"] = args.framework
     endpoint_config["model"] = args.model
